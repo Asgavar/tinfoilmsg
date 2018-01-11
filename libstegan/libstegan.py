@@ -10,3 +10,8 @@ def encode():
 
 def decode():
     pass  # TODO
+
+
+class RGBCycler:
+    def __init__(conf_dict):
+        pass
