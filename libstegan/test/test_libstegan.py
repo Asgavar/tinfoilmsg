@@ -53,3 +53,10 @@ def test_pixel_iter_0_3_should_be_blue():
     for x in range(4):
         pixel = next(pi)
     assert pixel[0] == 'blue'
+
+def test_pixel_iter_3_3_should_be_empty():
+    # its index is dividable by 3, but message should already be printed by now
+    pi = libstegan.PixelIter(generic_conf_dict, generic_msg)
+    for x in range(4*4):
+        pixel = next(pi)
+    assert pixel[0] == 'whatever'
