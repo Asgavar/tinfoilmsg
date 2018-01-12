@@ -18,8 +18,13 @@ import itertools
 import math
 
 
-def encode():
-    pass  # TODO
+def encode(conf_dict, message):
+    """
+    Converts the message to an image, according to the rules provided in conf_dict.
+    Returns an image file.
+    """
+    if not _validate_ascii(message):
+        raise Exception('Non-ASCII characters are disallowed!')
 
 
 def decode():
