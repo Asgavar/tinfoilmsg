@@ -55,12 +55,7 @@ def decode(conf_dict, image):
             continue
         xy = (pixel_info[1], pixel_info[2])
         which_color = colors.index(pixel_info[0])
-        if pixel_info[0] == 'red':
-            letter_ord = img_pixels[xy][which_color]
-        if pixel_info[0] == 'green':
-            letter_ord = img_pixels[xy][which_color]
-        if pixel_info[0] == 'blue':
-            letter_ord = img_pixels[xy][which_color]
+        letter_ord = img_pixels[xy][which_color]
         msg_str += chr(letter_ord)
     return msg_str
 
