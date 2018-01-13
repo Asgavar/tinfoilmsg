@@ -60,3 +60,12 @@ def test_pixel_iter_3_3_should_be_empty():
     for x in range(4*4):
         pixel = next(pi)
     assert pixel[0] == 'whatever'
+
+def test_craft_pixel_letter_a_in_red():
+    crafted_pixel = libstegan._craft_pixel('red', 'a', 0)
+    assert chr(crafted_pixel[0]) == 'a'
+
+def test_encode_decode_end_to_end():
+    msg_before = 'Ala posiada zwierze z czterema lapkami i ogonem'
+    msg_after = libstegan.encode(generic_conf_dict, msg_before)
+    assert libstegan.decode(generic_conf_dict, msg_after).startswith(msg_before)

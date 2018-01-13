@@ -40,8 +40,29 @@ def encode(conf_dict, message):
     return img
 
 
-def decode():
-    pass  # TODO
+def decode(conf_dict, image):
+    """
+    Extracts the message hidden in the image, according to the rules from conf_dict.
+    Returns the message string.
+    """
+    # FIXME
+    msg_prosthesis = 'a'*(image.size[0]*image.size[1]//conf_dict['frequency'])
+    msg_str = ''
+    colors = ['red', 'green', 'blue']
+    img_pixels = image.load()
+    for pixel_info in PixelIter(conf_dict, msg_prosthesis):
+        if pixel_info[0] == 'whatever':
+            continue
+        xy = (pixel_info[1], pixel_info[2])
+        which_color = colors.index(pixel_info[0])
+        if pixel_info[0] == 'red':
+            letter_ord = img_pixels[xy][which_color]
+        if pixel_info[0] == 'green':
+            letter_ord = img_pixels[xy][which_color]
+        if pixel_info[0] == 'blue':
+            letter_ord = img_pixels[xy][which_color]
+        msg_str += chr(letter_ord)
+    return msg_str
 
 
 def _validate_ascii(message):
@@ -106,7 +127,7 @@ class PixelIter:
         dim = _generate_dimensions(conf_dict, message)
         self.width = dim[0]
         self.height = dim[1]
-        # let's assume that the red, green and blue are the only bools there
+        # let's assume that red, green and blue are the only bools there
         meaningful_channels = [
             col for col in conf_dict.keys() if conf_dict[col] is True
         ]
