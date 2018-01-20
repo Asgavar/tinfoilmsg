@@ -129,7 +129,7 @@ class PixelIter:
         self.col_cycle = itertools.cycle(meaningful_channels)
         self.current_index = 0
         self.divisor = conf_dict['frequency']
-        self.msg_threshold = len(message) * 3
+        self.msg_threshold = len(message) * self.divisor
 
     def __iter__(self):
         return self
