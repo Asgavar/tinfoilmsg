@@ -5,6 +5,7 @@ install:
     - cd libstegan
     - pip install -r requirements.txt
     - pip install .
+    - cd ..
 services:
     - postgresql
 before_script:
@@ -12,4 +13,4 @@ before_script:
 script:
     - pytest -v
     - cd src
-    - python manage.py test
+    - python manage.py test -v2
