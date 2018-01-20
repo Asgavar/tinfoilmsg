@@ -9,4 +9,7 @@ services:
     - postgresql
 before_script:
     - psql -c 'create database tinfoilmsg;' -U postgres
-script: pytest -v
+script:
+    - pytest -v
+    - cd src
+    - python manage.py test
