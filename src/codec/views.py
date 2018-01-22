@@ -1,14 +1,13 @@
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render
 
 
-def index(request):
-    return HttpResponse('glowna')
-
-
+@login_required
 def encode(request):
-    return HttpResponse('encode')
+    return render(request, 'encode.html')
 
 
+@login_required
 def decode(request):
-    return HttpResponse('decode')
+    return render(request, 'decode.html')
