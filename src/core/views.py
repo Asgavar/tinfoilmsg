@@ -8,7 +8,7 @@ from django.shortcuts import render
 
 
 def index(request):
-    return render(request, 'index.html')
+    return render(request, 'index.html', {'user_authenticated': request.user.is_authenticated})
 
 
 def signup(request):
@@ -16,9 +16,10 @@ def signup(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('')
+            return redirect('/')
     return render(request, 'signup.html', {'form': UserCreationForm()})
+
 
 def logout_view(request):
     logout(request)
-    return HttpResponse('logged out successfully')
+    return redirect('/')
