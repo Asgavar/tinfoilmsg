@@ -1,6 +1,56 @@
-<h2>Login</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Login</button>
-</form>
+<body background="background.jpg" bgproperties="fixed">Background</body>
+
+<br>
+<br>
+<br>
+<font size=4>
+    <font color=Grey>
+        <font face="Aharoni">
+            <center>
+                <b>
+                    <h2>Login</h2>
+                    <b/>
+            </center>
+        </font>
+    </font>
+</font>
+
+<br>
+<br>
+<br>
+<center>
+    <form method="post">
+        {% csrf_token %}
+        <br>
+        <br> {{ form.as_p }}
+        <br>
+        <br>
+        <button type="submit">Login</button>
+    </form>
+</center>
+
+
+
+.btn {
+    background: #7d8082;
+    background-image: -webkit-linear-gradient(top, #7d8082, #323436);
+    background-image: -moz-linear-gradient(top, #7d8082, #323436);
+    background-image: -ms-linear-gradient(top, #7d8082, #323436);
+    background-image: -o-linear-gradient(top, #7d8082, #323436);
+    background-image: linear-gradient(to bottom, #7d8082, #323436);
+    -webkit-border-radius: 11;
+    -moz-border-radius: 11;
+    border-radius: 11px;
+    text-shadow: 0px 1px 3px #000000;
+    font-family: Arial;
+    color: #ffffff;
+    font-size: 20px;
+    padding: 10px 20px 10px 20px;
+    border: solid #b0b0b0 2px;
+    text-decoration: none;
+  }
+  
+  .btn:hover {
+    background: #383a3b;
+    text-decoration: none;
+  }

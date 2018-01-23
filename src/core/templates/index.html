@@ -1,8 +1,53 @@
-<h1>tinfoilmsg</h1>
-<a href="/signup">Sign up</a>
-<a href="/login">Login</a>
+<body background="background.jpg" bgproperties="fixed">Background</body>
+
+<br>
+<br>
+<br>
+<font size=4>
+    <font color=Grey>
+        <font face="Aharoni">
+            <center>
+                <b>
+                    <h1>TinFoilMSG</h1>
+                    <b/>
+            </center>
+        </font>
+    </font>
+</font>
+
+<center>
+    <br>
+    <a href="/signup">
+        <button type="button">Sign up</button>
+    </a>
+    <a href="/login">
+        <button type="button">Login</button>
+    </a>
+</center>
 {% if user_authenticated %}
-<a href="/logout">Log out</a>
-<a href="/encode">Encode</a>
-<a href="/decode">Decode</a>
+<center>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <a href="/encode">
+        <button type="button">Encode</button>
+    </a>
+    <br>
+    <br>
+    <a href="/decode">
+        <button type="button">Decode</button>
+    </a>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <a href="/logout">
+        <button type="button">Log out</button>
+    </a>
+</center>
 {% endif %}
