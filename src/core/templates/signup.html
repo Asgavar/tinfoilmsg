@@ -1,6 +1,30 @@
-<h2>Sign up</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Sign up</button>
-</form>
+<body background="background.jpg" bgproperties="fixed">Background</body>
+
+<br>
+<br>
+<br>
+<font size=4>
+    <font color=Grey>
+        <font face="Aharoni">
+            <center>
+                <b>
+                    <h2>Sign up</h2>
+                    <b/>
+            </center>
+        </font>
+    </font>
+</font>
+
+<br>
+<br>
+<br>
+<center>
+    <form method="post">
+        {% csrf_token %}
+        <br>
+        <br> {{ form.as_p }}
+        <br>
+        <br>
+        <button type="submit">Sign up</button>
+    </form>
+</center>
