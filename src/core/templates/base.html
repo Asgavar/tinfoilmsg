@@ -1,0 +1,11 @@
+<h1>tinfoilmsg</h1>
+{% if user.is_authenticated %}
+<a href="/logout">Log out</a>
+<a href="/encode">Encode</a>
+<a href="/decode">Decode</a>
+<a href="/my_algorithms">My algorithms</a>
+<a href="/algorithm_configuration">New algorithm</a>
+{% else %}
+<a href="/signup">Sign up</a>
+<a href="/login">Login</a>
+{% endif %}

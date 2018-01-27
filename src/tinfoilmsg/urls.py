@@ -14,4 +14,6 @@ urlpatterns = [
     path('logout/', core_views.logout_view),
     path('encode/', codec_views.encode),
     path('decode/', codec_views.decode),
+    path('my_algorithms/', codec_views.my_algorithms),
+    path('algorithm_configuration/', codec_views.algorithm_configuration),
 ]
