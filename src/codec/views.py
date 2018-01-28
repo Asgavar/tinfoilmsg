@@ -30,7 +30,7 @@ def my_algorithms(request):
 
 
 @login_required
-def algorithm_configuration(request, id=None):
+def algorithm_configuration(request):
     """
     Displays and receives a form which creates or modifies an algorithm,
     depending on whether the algorithm_id was passed in or not.
@@ -44,3 +44,13 @@ def algorithm_configuration(request, id=None):
             return HttpResponseRedirect('/my_algorithms')
     form = AlgorithmForm()
     return render(request, 'algorithm_configuration.html', {'form': form})
+
+
+@login_required
+def algorithm_delete(request, algo_id):
+    if request.method == 'POST':
+        if 'yesiam' in request.POST:
+            Algorithm.objects.get(id=algo_id).delete()
+            return HttpResponseRedirect('/my_algorithms')
+    victim = Algorithm.objects.get(id=algo_id)
+    return render(request, 'algorithm_delete.html', {'victim': victim})

@@ -1,21 +1,26 @@
 {% include "base.html" %}
-<table>
-    <tr>
-        <th>Sender</th>
-        <th>Receiver</th>
-        <th>Red?</th>
-        <th>Green?</th>
-        <th>Blue?</th>
-        <th>Frequency</th>
-    </tr>
-    {% for algorithm in to_show_list %}
-    <tr>
-        <td>{{ algorithm.sender }}</td>
-        <td>{{ algorithm.receiver }}</td>
-        <td>{{ algorithm.red }}</td>
-        <td>{{ algorithm.green }}</td>
-        <td>{{ algorithm.blue }}</td>
-        <td>{{ algorithm.frequency }}</td>
-    <tr>
-    {% endfor %}
-</table>
+<p>
+    <table>
+        <tr>
+            <th>Sender</th>
+            <th>Receiver</th>
+            <th>Red?</th>
+            <th>Green?</th>
+            <th>Blue?</th>
+            <th>Frequency</th>
+        </tr>
+        {% for algorithm in to_show_list %}
+        <tr>
+            <td>{{ algorithm.sender }}</td>
+            <td>{{ algorithm.receiver }}</td>
+            <td>{{ algorithm.red }}</td>
+            <td>{{ algorithm.green }}</td>
+            <td>{{ algorithm.blue }}</td>
+            <td>{{ algorithm.frequency }}</td>
+            <td>
+                <a href="/algorithm_delete/{{ algorithm.id }}">Delete</a>
+            </td>
+        <tr>
+        {% endfor %}
+    </table>
+</p>

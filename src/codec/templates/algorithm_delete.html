@@ -1,0 +1,11 @@
+<center>
+    <p>
+        Are you sure you want to delete <strong>{{ victim.sender }} -> {{ victim.receiver }}</strong>?
+    </p>
+    <form action="/algorithm_delete/{{ victim.id }}" method="post">
+        {% csrf_token %}
+        <input type="checkbox" name="yesiam" />
+        <label for="yesiam">Yes, I am</label>
+        <input type="submit" value="Confirm" />
+    </form>
+</center>
