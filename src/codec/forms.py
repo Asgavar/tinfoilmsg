@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib.auth.models import User
 from django.forms import ModelForm
 from django.forms import ModelChoiceField
@@ -12,4 +13,6 @@ class AlgorithmForm(ModelForm):
     """
     class Meta:
         model = Algorithm
-        fields = ['receiver', 'red', 'green', 'blue', 'frequency']
+        fields = ['sender', 'receiver', 'red', 'green', 'blue', 'frequency']
+        # sender field will be overwritten anyways
+        widgets = {'sender': forms.HiddenInput()}

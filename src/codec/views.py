@@ -38,11 +38,13 @@ def algorithm_configuration(request):
     if request.method == 'POST':
         form = AlgorithmForm(request.POST)
         if form.is_valid():
+            # TODO: show a message after validation failure
             new_algorithm = form.save(commit=False)
             new_algorithm.sender = request.user
             new_algorithm.save()
             return HttpResponseRedirect('/my_algorithms')
-    form = AlgorithmForm()
+    # sender field is set twice since it's needed for validation
+    form = AlgorithmForm(initial={'sender': request.user})
     return render(request, 'algorithm_configuration.html', {'form': form})
 
 

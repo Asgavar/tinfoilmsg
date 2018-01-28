@@ -1,5 +1,8 @@
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Q
+
 
 class Algorithm(models.Model):
     """
@@ -14,3 +17,30 @@ class Algorithm(models.Model):
     green = models.BooleanField()
     blue = models.BooleanField()
     frequency = models.IntegerField()
+
+    def clean(self):
+        """
+        Performs form validation, checks if:
+        1) sender-receiver pair does not already exist in the database
+        2) frequency field is greater than zero
+        3) at least one color channel is selected
+        """
+        super_clean = super().clean()
+        print(self.sender)
+        print(self.receiver)
+        sr_pair_query = Q(sender=self.sender) & Q(receiver=self.receiver)
+        if Algorithm.objects.filter(sr_pair_query).count() != 0:
+            raise ValidationError(
+                'An algorithm connecting these two users already exists!',
+                code='pair_exists'
+            )
+        if self.frequency <= 0:
+            raise ValidationError(
+                'Frequency parameter must be greater than zero!',
+                code='frequency_le_zero'
+            )
+        if not (self.red or self.green or self.blue):
+            raise ValidationError(
+                'At least one color channel must be selected!',
+                code='no_color_selected'
+            )
