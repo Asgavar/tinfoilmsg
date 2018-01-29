@@ -16,3 +16,17 @@ class AlgorithmForm(ModelForm):
         fields = ['sender', 'receiver', 'red', 'green', 'blue', 'frequency']
         # sender field will be overwritten anyways
         widgets = {'sender': forms.HiddenInput()}
+
+
+class EncodeForm(forms.Form):
+    # queryset will be updated in __init__
+    message_receiver = forms.ModelChoiceField(User.objects.none())
+    message_text = forms.CharField()
+
+    def __init__(self, possible_receivers, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['message_receiver'].queryset = possible_receivers
+
+
+class DecodeForm(forms.Form):
+    pass

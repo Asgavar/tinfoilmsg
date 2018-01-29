@@ -1,2 +1,6 @@
 {% include "base.html" %}
-ENCODE XD
+<form action="#" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="Submit" value="Encode" />
+</form>

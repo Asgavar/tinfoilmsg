@@ -1,20 +1,26 @@
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
 from .forms import AlgorithmForm
+from .forms import DecodeForm
+from .forms import EncodeForm
 from .models import Algorithm
 
 
 @login_required
 def encode(request):
-    return render(request, 'encode.html')
+    where_user_is_sender = Algorithm.objects.filter(sender=request.user)
+    receiver_ids = [algo.receiver.id for algo in where_user_is_sender]
+    available_rec = User.objects.filter(id__in=receiver_ids)
+    return render(request, 'encode.html', {'form': EncodeForm(available_rec)})
 
 
 @login_required
 def decode(request):
-    return render(request, 'decode.html')
+    return render(request, 'decode.html', {'form': DecodeForm()})
 
 
 @login_required
