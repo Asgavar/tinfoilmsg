@@ -29,4 +29,9 @@ class EncodeForm(forms.Form):
 
 
 class DecodeForm(forms.Form):
-    pass
+    image_sender = forms.ModelChoiceField(User.objects.none())
+    image_file = forms.FileField()
+
+    def __init__(self, possible_senders, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['image_sender'].queryset = possible_senders
