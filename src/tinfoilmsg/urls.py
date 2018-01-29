@@ -1,10 +1,13 @@
 from django.contrib import admin
 from django.urls import path
 from django.urls import include
+from django.conf.urls.static import static
 
 from django.contrib.auth import views as auth_views
 from codec import views as codec_views
 from core import views as core_views
+
+from . import settings
 
 urlpatterns = [
     path('', core_views.index),
@@ -19,4 +22,4 @@ urlpatterns = [
     path('algorithm_delete/<int:algo_id>', codec_views.algorithm_delete),
     path('encode/results/', codec_views.encode_results),
     path('decode/results/', codec_views.decode_results),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
