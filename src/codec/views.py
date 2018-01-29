@@ -62,3 +62,16 @@ def algorithm_delete(request, algo_id):
             return HttpResponseRedirect('/my_algorithms')
     victim = Algorithm.objects.get(id=algo_id)
     return render(request, 'algorithm_delete.html', {'victim': victim})
+
+
+@login_required
+def encode_results(request):
+    if request.method == 'POST':
+        print(request.POST['message_receiver'])
+        print(request.POST['message_text'])
+    return HttpResponseRedirect('/')
+
+
+@login_required
+def decode_results(request):
+    pass

@@ -16,5 +16,7 @@ urlpatterns = [
     path('decode/', codec_views.decode),
     path('my_algorithms/', codec_views.my_algorithms),
     path('algorithm_configuration/', codec_views.algorithm_configuration),
-    path('algorithm_delete/<int:algo_id>', codec_views.algorithm_delete)
+    path('algorithm_delete/<int:algo_id>', codec_views.algorithm_delete),
+    path('encode/results/', codec_views.encode_results),
+    path('decode/results/', codec_views.decode_results),
 ]
