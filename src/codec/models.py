@@ -25,7 +25,7 @@ class Algorithm(models.Model):
         2) frequency field is greater than zero
         3) at least one color channel is selected
         """
-        super_clean = super().clean()
+        super().clean()
         print(self.sender)
         print(self.receiver)
         sr_pair_query = Q(sender=self.sender) & Q(receiver=self.receiver)
