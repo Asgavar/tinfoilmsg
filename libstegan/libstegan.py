@@ -32,7 +32,7 @@ def encode(conf_dict, message):
     img = Image.new('RGB', dimensions)
     img_pixels = img.load()
     msg_pointer = 0
-    for pixel in PixelIter(conf_dict, message):
+    for pixel in PixelIterator(conf_dict, img):
         new_rgb_tuple = _craft_pixel(pixel[0], message, msg_pointer)
         img_pixels[pixel[1], pixel[2]] = new_rgb_tuple
         if pixel[0] in ('red', 'green', 'blue'):
@@ -45,12 +45,10 @@ def decode(conf_dict, image):
     Extracts the message hidden in the image, according to the rules from conf_dict.
     Returns the message string.
     """
-    # FIXME
-    msg_prosthesis = 'a'*(image.size[0]*image.size[1]//conf_dict['frequency'])
     msg_str = ''
     colors = ['red', 'green', 'blue']
     img_pixels = image.load()
-    for pixel_info in PixelIter(conf_dict, msg_prosthesis):
+    for pixel_info in PixelIterator(conf_dict, image):
         if pixel_info[0] == 'whatever':
             continue
         xy = (pixel_info[1], pixel_info[2])
@@ -98,10 +96,10 @@ def _craft_pixel(color, message, msg_pointer):
     """
     Returns a RGB tuple inside which there is or there is not a letter.
     """
+    if color == 'whatever' or msg_pointer >= len(message):
+        return (_random_color(), _random_color(), _random_color())
     if color in ('red', 'green', 'blue'):
         letter = ord(message[msg_pointer])
-    if color == 'whatever':
-        return (_random_color(), _random_color(), _random_color())
     if color == 'red':
         return (letter, _random_color(), _random_color())
     if color == 'green':
@@ -110,13 +108,39 @@ def _craft_pixel(color, message, msg_pointer):
         return (_random_color(), _random_color(), letter)
 
 
-class PixelIter:
+class PixelIterator:
     """
     An object to be iterated over.
     Returns 3-tuples which consist of a channel and x, y coordinates.
     Currently supports only 1:1 image ratio.
     """
+    def __init__(self, conf_dict, image):
+        self.conf_dict = conf_dict
+        # let's assume that red, green and blue are the only bools there
+        meaningful_channels = [
+            col for col in conf_dict.keys() if conf_dict[col] is True
+        ]
+        self.col_cycle = itertools.cycle(meaningful_channels)
+        self.heightandwidth = image.size[0]
+        self.frequency = conf_dict['frequency']
+        self.index = 0
 
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        ind = self.index
+        self.index += 1
+        if ind >= self.heightandwidth ** 2:
+            raise StopIteration
+        row = ind // self.heightandwidth
+        column = ind % self.heightandwidth
+        if not ind % self.frequency:
+            return (next(self.col_cycle), column, row)
+        return ('whatever', column, row)
+
+
+class PixelIter:
     def __init__(self, conf_dict, message):
         self.conf_dict = conf_dict
         dim = _generate_dimensions(conf_dict, message)

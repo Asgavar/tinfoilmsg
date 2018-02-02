@@ -70,15 +70,15 @@ def test_encode_decode_end_to_end():
     msg_after = libstegan.encode(generic_conf_dict, msg_before)
     assert libstegan.decode(generic_conf_dict, msg_after).startswith(msg_before)
 
-# def test_encode_decode_with_long_frequency():
-#     msg = 'abcdefgh'
-#     another_conf_dict = {
-#         'red': True,
-#         'green': False,
-#         'blue': True,
-#         'frequency': 13,
-#     }
-#     pi = libstegan.PixelIter(another_conf_dict, msg)
-#     print([p for p in list(pi) if p[0] != 'whatever'])
-#     msg_after = libstegan.encode(another_conf_dict, msg)
-#     assert libstegan.decode(another_conf_dict, msg_after).startswith(msg)
+def test_encode_decode_with_long_frequency():
+    msg = 'abcdefgh'
+    another_conf_dict = {
+        'red': True,
+        'green': False,
+        'blue': True,
+        'frequency': 13,
+    }
+    pi = libstegan.PixelIter(another_conf_dict, msg)
+    print([p for p in list(pi) if p[0] != 'whatever'])
+    msg_after = libstegan.encode(another_conf_dict, msg)
+    assert libstegan.decode(another_conf_dict, msg_after).startswith(msg)
