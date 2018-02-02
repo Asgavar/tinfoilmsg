@@ -70,7 +70,6 @@ def _minimal_pixel_count(conf_dict, message):
     """
     Calculates the minimal amount of pixels needed to encode the message.
     """
-    # meaningful_channels_amount = list(conf_dict.values()).count(True)
     frequency = conf_dict['frequency']
     return len(message) + ((frequency - 1) * (len(message) - 1))
 
