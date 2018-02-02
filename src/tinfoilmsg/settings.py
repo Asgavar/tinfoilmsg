@@ -79,7 +79,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'tinfoilmsg',
-        'User': 'postgres'  # much security xD
+        'USER': 'postgres'  # much security xD
     }
 }
 
