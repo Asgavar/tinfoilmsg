@@ -137,33 +137,3 @@ class PixelIterator:
         if not ind % self.frequency:
             return (next(self.col_cycle), column, row)
         return ('whatever', column, row)
-
-
-class PixelIter:
-    def __init__(self, conf_dict, message):
-        self.conf_dict = conf_dict
-        dim = _generate_dimensions(conf_dict, message)
-        self.width = dim[0]
-        self.height = dim[1]
-        # let's assume that red, green and blue are the only bools there
-        meaningful_channels = [
-            col for col in conf_dict.keys() if conf_dict[col] is True
-        ]
-        self.col_cycle = itertools.cycle(meaningful_channels)
-        self.current_index = 0
-        self.divisor = conf_dict['frequency']
-        self.msg_threshold = len(message) * self.divisor
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        ind = self.current_index
-        self.current_index += 1
-        if ind >= self.width * self.height:
-            raise StopIteration
-        row = ind // self.width
-        column = ind % self.width
-        if not ind % self.divisor and self.current_index < self.msg_threshold:
-            return (next(self.col_cycle), column, row)
-        return ('whatever', column, row)
