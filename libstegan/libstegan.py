@@ -16,6 +16,7 @@ on positions dividable by 3 in particular.
 
 import itertools
 import math
+import multiprocessing as mp
 import random
 
 from PIL import Image
@@ -44,18 +45,27 @@ def decode(conf_dict, image):
     """
     Extracts the message hidden in the image, according to the rules from conf_dict.
     Returns the message string.
+    Uses multiprocessing.Pool under the hood.
     """
-    msg_str = ''
+    # e.g. ((0, 0, 'blue'), (255, 255, 97)) where 97 is ord('a')
+    img_pixels = zip(PixelIterator(conf_dict, image), image.getdata())
+    with mp.Pool() as pool:
+        msg = pool.starmap(_decode_worker, img_pixels)
+    return ''.join(msg)
+
+
+def _decode_worker(pixel_info, pixel_rgb):
+    """
+    Receives two tuples containing information about a pixel: its RGB
+    values and channel info from PixelIterator.
+    Returns a letter or an empty string.
+    """
     colors = ['red', 'green', 'blue']
-    img_pixels = image.load()
-    for pixel_info in PixelIterator(conf_dict, image):
-        if pixel_info[0] == 'whatever':
-            continue
-        xy = (pixel_info[1], pixel_info[2])
-        which_color = colors.index(pixel_info[0])
-        letter_ord = img_pixels[xy][which_color]
-        msg_str += chr(letter_ord)
-    return msg_str
+    if pixel_info[0] == 'whatever':
+        return ''
+    which_color = colors.index(pixel_info[0])
+    letter_ord = pixel_rgb[which_color]
+    return chr(letter_ord)
 
 
 def _validate_ascii(message):
