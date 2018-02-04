@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.urls import include
 from django.urls import path
 from django.conf.urls.static import static
 
@@ -10,6 +11,7 @@ from . import settings
 
 urlpatterns = [
     path('', core_views.index),
+    path('admin/doc/', include('django.contrib.admindocs.urls')),
     path('admin/', admin.site.urls),
     path('signup/', core_views.signup),
     path('login/', auth_views.login, {'template_name': 'login.html'}),
