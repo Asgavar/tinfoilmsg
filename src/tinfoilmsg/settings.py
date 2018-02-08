@@ -126,6 +126,6 @@ STATIC_URL = '/static/'
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/login'
 
-TINFOILMSG_TMP_DIR = '/tmp/tinfoilmsg/'
+TINFOILMSG_TMP_DIR = os.path.join(BASE_DIR, 'media/')
 MEDIA_ROOT = TINFOILMSG_TMP_DIR
 MEDIA_URL = '/media/'
