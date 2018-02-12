@@ -1,0 +1,233 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>libstegan &#8212; tinfoilmsg  documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for libstegan</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">A small helper library for tinfoilmsg which handles the image and text</span>
+<span class="sd">transformations.</span>
+<span class="sd">The dictionary which is supposed to be passed to these functions and classes</span>
+<span class="sd">can look like this:</span>
+<span class="sd">{</span>
+<span class="sd">    &#39;red&#39;: True,</span>
+<span class="sd">    &#39;green&#39;: False,</span>
+<span class="sd">    &#39;blue&#39;: True,</span>
+<span class="sd">    &#39;frequency&#39;: 3</span>
+<span class="sd">}</span>
+<span class="sd">This will tell them that only red and blue channels are interesting, and pixels</span>
+<span class="sd">on positions dividable by 3 in particular.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="k">import</span> <span class="n">Image</span>
+
+
+<div class="viewcode-block" id="encode"><a class="viewcode-back" href="../libstegan.html#libstegan.encode">[docs]</a><span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="n">conf_dict</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts the message to an image, according to the rules provided in conf_dict.</span>
+<span class="sd">    Returns an image file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_validate_ascii</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Non-ASCII characters are disallowed!&#39;</span><span class="p">)</span>
+    <span class="n">dimensions</span> <span class="o">=</span> <span class="n">_generate_dimensions</span><span class="p">(</span><span class="n">conf_dict</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGB&#39;</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">)</span>
+    <span class="n">img_pixels</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+    <span class="n">msg_pointer</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">pixel</span> <span class="ow">in</span> <span class="n">PixelIterator</span><span class="p">(</span><span class="n">conf_dict</span><span class="p">,</span> <span class="n">img</span><span class="p">):</span>
+        <span class="n">new_rgb_tuple</span> <span class="o">=</span> <span class="n">_craft_pixel</span><span class="p">(</span><span class="n">pixel</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">message</span><span class="p">,</span> <span class="n">msg_pointer</span><span class="p">)</span>
+        <span class="n">img_pixels</span><span class="p">[</span><span class="n">pixel</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">pixel</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="n">new_rgb_tuple</span>
+        <span class="k">if</span> <span class="n">pixel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;blue&#39;</span><span class="p">):</span>
+            <span class="n">msg_pointer</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">img</span></div>
+
+
+<div class="viewcode-block" id="decode"><a class="viewcode-back" href="../libstegan.html#libstegan.decode">[docs]</a><span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="n">conf_dict</span><span class="p">,</span> <span class="n">image</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extracts the message hidden in the image, according to the rules from conf_dict.</span>
+<span class="sd">    Returns the message string.</span>
+<span class="sd">    Uses multiprocessing.Pool under the hood.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># e.g. ((0, 0, &#39;blue&#39;), (255, 255, 97)) where 97 is ord(&#39;a&#39;)</span>
+    <span class="n">img_pixels</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">PixelIterator</span><span class="p">(</span><span class="n">conf_dict</span><span class="p">,</span> <span class="n">image</span><span class="p">),</span> <span class="n">image</span><span class="o">.</span><span class="n">getdata</span><span class="p">())</span>
+    <span class="k">with</span> <span class="n">mp</span><span class="o">.</span><span class="n">Pool</span><span class="p">()</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">_decode_worker</span><span class="p">,</span> <span class="n">img_pixels</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="_decode_worker"><a class="viewcode-back" href="../libstegan.html#libstegan._decode_worker">[docs]</a><span class="k">def</span> <span class="nf">_decode_worker</span><span class="p">(</span><span class="n">pixel_info</span><span class="p">,</span> <span class="n">pixel_rgb</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Receives two tuples containing information about a pixel: its RGB</span>
+<span class="sd">    values and channel info from PixelIterator.</span>
+<span class="sd">    Returns a letter or an empty string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;blue&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">pixel_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;whatever&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">which_color</span> <span class="o">=</span> <span class="n">colors</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">pixel_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">letter_ord</span> <span class="o">=</span> <span class="n">pixel_rgb</span><span class="p">[</span><span class="n">which_color</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nb">chr</span><span class="p">(</span><span class="n">letter_ord</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="_validate_ascii"><a class="viewcode-back" href="../libstegan.html#libstegan._validate_ascii">[docs]</a><span class="k">def</span> <span class="nf">_validate_ascii</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Ensure that the message provided is composed of ASCII letters only,</span>
+<span class="sd">    it&#39;s crucial since it will be mapped to RGB values which can&#39;t exceed 255.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">128</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">message</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="_minimal_pixel_count"><a class="viewcode-back" href="../libstegan.html#libstegan._minimal_pixel_count">[docs]</a><span class="k">def</span> <span class="nf">_minimal_pixel_count</span><span class="p">(</span><span class="n">conf_dict</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the minimal amount of pixels needed to encode the message.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">frequency</span> <span class="o">=</span> <span class="n">conf_dict</span><span class="p">[</span><span class="s1">&#39;frequency&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">message</span><span class="p">)</span> <span class="o">+</span> <span class="p">((</span><span class="n">frequency</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">message</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="_generate_dimensions"><a class="viewcode-back" href="../libstegan.html#libstegan._generate_dimensions">[docs]</a><span class="k">def</span> <span class="nf">_generate_dimensions</span><span class="p">(</span><span class="n">conf_dict</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a 2-tuple consisting of width and height of an image which has</span>
+<span class="sd">    no less than _minimal_pixel_count pixels.</span>
+<span class="sd">    Only 1:1 ratio for now.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sq_side</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">_minimal_pixel_count</span><span class="p">(</span><span class="n">conf_dict</span><span class="p">,</span> <span class="n">message</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">sq_side</span><span class="p">,</span> <span class="n">sq_side</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="_random_color"><a class="viewcode-back" href="../libstegan.html#libstegan._random_color">[docs]</a><span class="k">def</span> <span class="nf">_random_color</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Does exactly what it is supposed to do.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="_craft_pixel"><a class="viewcode-back" href="../libstegan.html#libstegan._craft_pixel">[docs]</a><span class="k">def</span> <span class="nf">_craft_pixel</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">msg_pointer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a RGB tuple inside which there is or there is not a letter.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">color</span> <span class="o">==</span> <span class="s1">&#39;whatever&#39;</span> <span class="ow">or</span> <span class="n">msg_pointer</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">_random_color</span><span class="p">(),</span> <span class="n">_random_color</span><span class="p">(),</span> <span class="n">_random_color</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">color</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;blue&#39;</span><span class="p">):</span>
+        <span class="n">letter</span> <span class="o">=</span> <span class="nb">ord</span><span class="p">(</span><span class="n">message</span><span class="p">[</span><span class="n">msg_pointer</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">color</span> <span class="o">==</span> <span class="s1">&#39;red&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">letter</span><span class="p">,</span> <span class="n">_random_color</span><span class="p">(),</span> <span class="n">_random_color</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">color</span> <span class="o">==</span> <span class="s1">&#39;green&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">_random_color</span><span class="p">(),</span> <span class="n">letter</span><span class="p">,</span> <span class="n">_random_color</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">color</span> <span class="o">==</span> <span class="s1">&#39;blue&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">_random_color</span><span class="p">(),</span> <span class="n">_random_color</span><span class="p">(),</span> <span class="n">letter</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PixelIterator"><a class="viewcode-back" href="../libstegan.html#libstegan.PixelIterator">[docs]</a><span class="k">class</span> <span class="nc">PixelIterator</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An object to be iterated over.</span>
+<span class="sd">    Returns 3-tuples which consist of a channel and x, y coordinates.</span>
+<span class="sd">    Currently supports only 1:1 image ratio.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conf_dict</span><span class="p">,</span> <span class="n">image</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conf_dict</span> <span class="o">=</span> <span class="n">conf_dict</span>
+        <span class="c1"># let&#39;s assume that red, green and blue are the only bools there</span>
+        <span class="n">meaningful_channels</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">conf_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">conf_dict</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">col_cycle</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">meaningful_channels</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">heightandwidth</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frequency</span> <span class="o">=</span> <span class="n">conf_dict</span><span class="p">[</span><span class="s1">&#39;frequency&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">ind</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">heightandwidth</span> <span class="o">**</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">StopIteration</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">ind</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">heightandwidth</span>
+        <span class="n">column</span> <span class="o">=</span> <span class="n">ind</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">heightandwidth</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ind</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">col_cycle</span><span class="p">),</span> <span class="n">column</span><span class="p">,</span> <span class="n">row</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;whatever&#39;</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">row</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">tinfoilmsg</a></h1>
+
+
+
+
+
+
+
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Artur Juraszek.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

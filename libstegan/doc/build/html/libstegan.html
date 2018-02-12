@@ -1,0 +1,165 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>libstegan module &#8212; tinfoilmsg  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-libstegan">
+<span id="libstegan-module"></span><h1>libstegan module<a class="headerlink" href="#module-libstegan" title="Permalink to this headline">¶</a></h1>
+<p>A small helper library for tinfoilmsg which handles the image and text
+transformations.
+The dictionary which is supposed to be passed to these functions and classes
+can look like this:
+{</p>
+<blockquote>
+<div>‘red’: True,
+‘green’: False,
+‘blue’: True,
+‘frequency’: 3</div></blockquote>
+<p>}
+This will tell them that only red and blue channels are interesting, and pixels
+on positions dividable by 3 in particular.</p>
+<dl class="class">
+<dt id="libstegan.PixelIterator">
+<em class="property">class </em><code class="descclassname">libstegan.</code><code class="descname">PixelIterator</code><span class="sig-paren">(</span><em>conf_dict</em>, <em>image</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libstegan.html#PixelIterator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libstegan.PixelIterator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>An object to be iterated over.
+Returns 3-tuples which consist of a channel and x, y coordinates.
+Currently supports only 1:1 image ratio.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="libstegan._craft_pixel">
+<code class="descclassname">libstegan.</code><code class="descname">_craft_pixel</code><span class="sig-paren">(</span><em>color</em>, <em>message</em>, <em>msg_pointer</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libstegan.html#_craft_pixel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libstegan._craft_pixel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a RGB tuple inside which there is or there is not a letter.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="libstegan._decode_worker">
+<code class="descclassname">libstegan.</code><code class="descname">_decode_worker</code><span class="sig-paren">(</span><em>pixel_info</em>, <em>pixel_rgb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libstegan.html#_decode_worker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libstegan._decode_worker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receives two tuples containing information about a pixel: its RGB
+values and channel info from PixelIterator.
+Returns a letter or an empty string.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="libstegan._generate_dimensions">
+<code class="descclassname">libstegan.</code><code class="descname">_generate_dimensions</code><span class="sig-paren">(</span><em>conf_dict</em>, <em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libstegan.html#_generate_dimensions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libstegan._generate_dimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a 2-tuple consisting of width and height of an image which has
+no less than _minimal_pixel_count pixels.
+Only 1:1 ratio for now.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="libstegan._minimal_pixel_count">
+<code class="descclassname">libstegan.</code><code class="descname">_minimal_pixel_count</code><span class="sig-paren">(</span><em>conf_dict</em>, <em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libstegan.html#_minimal_pixel_count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libstegan._minimal_pixel_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the minimal amount of pixels needed to encode the message.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="libstegan._random_color">
+<code class="descclassname">libstegan.</code><code class="descname">_random_color</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/libstegan.html#_random_color"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libstegan._random_color" title="Permalink to this definition">¶</a></dt>
+<dd><p>Does exactly what it is supposed to do.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="libstegan._validate_ascii">
+<code class="descclassname">libstegan.</code><code class="descname">_validate_ascii</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libstegan.html#_validate_ascii"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libstegan._validate_ascii" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensure that the message provided is composed of ASCII letters only,
+it’s crucial since it will be mapped to RGB values which can’t exceed 255.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="libstegan.decode">
+<code class="descclassname">libstegan.</code><code class="descname">decode</code><span class="sig-paren">(</span><em>conf_dict</em>, <em>image</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libstegan.html#decode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libstegan.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts the message hidden in the image, according to the rules from conf_dict.
+Returns the message string.
+Uses multiprocessing.Pool under the hood.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="libstegan.encode">
+<code class="descclassname">libstegan.</code><code class="descname">encode</code><span class="sig-paren">(</span><em>conf_dict</em>, <em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/libstegan.html#encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libstegan.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the message to an image, according to the rules provided in conf_dict.
+Returns an image file.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">tinfoilmsg</a></h1>
+
+
+
+
+
+
+
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Artur Juraszek.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/libstegan.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
